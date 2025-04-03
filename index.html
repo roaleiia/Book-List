@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện sách</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 30px;
+            background: #fdf6f0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #5a3e36;
+        }
+
+        .book-list,
+        .book-detail {
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .book-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .book-item:hover {
+            background: #f5f5f5;
+        }
+
+        .book-item.selected {
+            background: #fffbe0;
+            font-weight: bold;
+        }
+
+        .book-detail {
+            display: none;
+        }
+
+        .book-detail img {
+            width: 200px;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .price {
+            color: #b14525;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .description {
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .layout {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .book-list {
+            flex: 1;
+        }
+
+        .book-detail {
+            flex: 2;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Sách Nguyễn Nhật Ánh</h1>
+    <div class="layout">
+        <div class="book-list">
+            <h2>Sách hiện có:</h2>
+            <ul id="bookContainer"></ul>
+        </div>
+        <div class="book-detail" id="bookDetail">
+            <h2 id="bookTitle"></h2>
+            <img id="bookImage" src="" alt="">
+            <p class="price" id="bookPrice"></p>
+            <p class="description" id="bookDescription"></p>
+        </div>
+    </div>
+    <script>
+        const bookList = [
+            { id: 1, name: "Mắt biếc", price: "70.000 VND", description: "Mắt biếc là tiểu thuyết của nhà văn Nguyễn Nhật Ánh trong loạt truyện viết về tình yêu thanh thiếu niên...", image: "https://upload.wikimedia.org/wikipedia/vi/9/92/Mat_Biec.gif?20210321090227" },
+            { id: 2, name: "Hạ đỏ", price: "130.000 VND", description: "Hạ đỏ là một truyện dài của nhà văn Nguyễn Nhật Ánh, xuất bản năm 1991. Là một trong một loạt tác phẩm viết về tình yêu tuổi mới lớn của tác giả", image: "https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1587797857i/12456458.jpg" },
+            { id: 3, name: "Còn chút gì để nhớ", price: "90.000 VND", description: "Còn chút gì để nhớ là truyện dài của nhà văn Nguyễn Nhật Ánh, gồm 31 phần, sáng tác năm 1988.", image: "https://upload.wikimedia.org/wikipedia/vi/d/d9/C%C3%B2n_ch%C3%BAt_g%C3%AC_%C4%91%E1%BB%83_nh%E1%BB%9B.jpg" },
+            { id: 4, name: "Trại hoa vàng", price: "85.000 VND", description: "Trại hoa vàng là một truyện dài của nhà văn Nguyễn Nhật Ánh, được xuất bản năm 1994...", image: "data:image/jpeg;base64,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" },
+            { id: 5, name: "Đi qua hoa cúc", price: "60.000 VND", description: "“Đi qua hoa cúc” là một truyện dài được Nguyễn Nhật Ánh chắp bút vào năm 1995. Trong tác phẩm, nhà văn đã vận dụng nghệ thuật miêu tả nội tâm nhân vật một cách hết sức đặc sắc, miêu tả chi tiết từng cảm xúc, diễn biến tâm lí cho các nhân vật. Đặc biệt là đoạn kết đã để lại trong lòng người đọc những khoảng lặng...", image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHMQ5Shnlr19u7_OpQX4mqgF8dMPXkx1ucQ3qrk8zl-oN6IVwS" },
+            { id: 6, name: "Quán gò đi lên", price: "40.000 VND", description: "Đo Đo – là tên một ngôi làng nhỏ ở Quảng Nam và đồng thời cũng là quê hương thân thương của nhà văn Nguyễn Nhật Ánh, chính ngôi làng nhỏ này là chiếc nôi nuôi nấng và chứng kiến sự trưởng thành của nhà văn.", image: "https://cdn0.fahasa.com/media/catalog/product/8/9/8934974178699.jpg" },
+
+
+        ];
+
+        const container = document.getElementById("bookContainer");
+        const detail = document.getElementById("bookDetail");
+        const title = document.getElementById("bookTitle");
+        const price = document.getElementById("bookPrice");
+        const description = document.getElementById("bookDescription");
+        const image = document.getElementById("bookImage");
+
+        bookList.forEach(book => {
+            const li = document.createElement("li");
+            li.className = "book-item";
+            li.textContent = book.name;
+            li.onclick = () => {
+                title.textContent = book.name;
+                price.textContent = book.price;
+                description.textContent = book.description;
+                image.src = book.image;
+                image.alt = book.name;
+                detail.style.display = "block";
+                document.querySelectorAll('.book-item').forEach(item => item.classList.remove('selected'));
+                li.classList.add('selected');
+            };
+            container.appendChild(li);
+        });
+    </script>
+</body>
+
+</html>
